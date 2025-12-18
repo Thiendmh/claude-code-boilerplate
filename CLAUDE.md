@@ -48,6 +48,8 @@
 13. [Git Workflow](#13-git-workflow)
 14. [Issue Hierarchy](#14-issue-hierarchy)
 15. [AI Agent Workflow](#15-ai-agent-workflow)
+    - [15.0 TDD-First Principle (ABSOLUTE REQUIREMENT)](#150-tdd-first-principle-absolute-requirement)
+    - [15.0.1 Zero-Impact Implementation (ABSOLUTE REQUIREMENT)](#1501-zero-impact-implementation-absolute-requirement)
 16. [Claude Code Configuration](#16-claude-code-configuration)
 
 ---
@@ -883,6 +885,216 @@ Task details.
 
 ## 15. AI Agent Workflow
 
+### 15.0 TDD-First Principle (ABSOLUTE REQUIREMENT)
+
+**TEST-DRIVEN DEVELOPMENT IS NON-NEGOTIABLE. NO EXCEPTIONS. EVER.**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ⚠️  CRITICAL: TDD IS MANDATORY FOR ALL WORK               │
+│                                                             │
+│  This applies to:                                           │
+│  • Every feature implementation                             │
+│  • Every bug fix                                            │
+│  • Every refactoring                                        │
+│  • Every code change, no matter how small                   │
+│  • Every agent, every task, every action                    │
+│                                                             │
+│  NO CODE SHALL BE WRITTEN WITHOUT A FAILING TEST FIRST      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### TDD Cycle - MUST Follow Strictly
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    STRICT TDD CYCLE                         │
+│                                                             │
+│    ┌─────────┐                                              │
+│    │   RED   │  1. Write a failing test FIRST               │
+│    │         │     - Test MUST fail before implementation   │
+│    │         │     - Verify test fails for right reason     │
+│    └────┬────┘                                              │
+│         │                                                   │
+│         ▼                                                   │
+│    ┌─────────┐                                              │
+│    │  GREEN  │  2. Write MINIMUM code to pass               │
+│    │         │     - Only enough code to make test pass     │
+│    │         │     - No extra features or "improvements"    │
+│    └────┬────┘                                              │
+│         │                                                   │
+│         ▼                                                   │
+│    ┌─────────┐                                              │
+│    │REFACTOR │  3. Improve code quality                     │
+│    │         │     - Clean up while tests stay green        │
+│    │         │     - No new functionality in this phase     │
+│    └────┬────┘                                              │
+│         │                                                   │
+│         └──────────► REPEAT for next requirement            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### TDD Violations - STRICTLY PROHIBITED
+
+| Violation | Consequence |
+|-----------|-------------|
+| Writing implementation code before test | **REVERT immediately, start over** |
+| Skipping TDD "just this once" | **NOT ALLOWED - no exceptions** |
+| Writing tests after implementation | **DELETE code, write test first** |
+| "The change is too small for tests" | **FALSE - ALL changes need tests** |
+| "I'll add tests later" | **PROHIBITED - tests come FIRST** |
+| "Tests slow me down" | **Tests SAVE time - follow TDD** |
+
+#### TDD Checklist - EVERY Task
+
+Before writing ANY implementation code, verify:
+
+- [ ] **Test file exists** for the feature/fix
+- [ ] **Test is written** that describes expected behavior
+- [ ] **Test FAILS** (red phase confirmed)
+- [ ] **Failure reason** is correct (not syntax error, etc.)
+
+Only AFTER all above are checked:
+
+- [ ] Write minimum implementation to pass
+- [ ] All tests pass (green phase)
+- [ ] Refactor if needed (tests still green)
+
+#### TDD Workflow Integration
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  FOR EVERY TASK/ACTION/CHANGE:                              │
+│                                                             │
+│  1. Understand the requirement                              │
+│  2. WRITE TEST FIRST (describing expected behavior)         │
+│  3. RUN TEST → Must FAIL (RED)                              │
+│  4. Write minimum code to pass                              │
+│  5. RUN TEST → Must PASS (GREEN)                            │
+│  6. Refactor if needed                                      │
+│  7. RUN TEST → Must still PASS                              │
+│  8. REPEAT for next requirement                             │
+│                                                             │
+│  ⚠️  NEVER skip steps 2-3. NEVER write code without test.   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**WARNING: Any agent that skips TDD will have their work REJECTED and must start over following proper TDD discipline.**
+
+---
+
+### 15.0.1 Zero-Impact Implementation (ABSOLUTE REQUIREMENT)
+
+**IMPLEMENTATIONS MUST NEVER BREAK EXISTING FUNCTIONALITY. NO EXCEPTIONS.**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ⚠️  CRITICAL: PROTECT CURRENT STATE AT ALL COSTS          │
+│                                                             │
+│  Every implementation MUST:                                 │
+│  • Pass ALL existing tests before AND after changes         │
+│  • Not modify existing behavior unless explicitly required  │
+│  • Be backward compatible by default                        │
+│  • Preserve all existing functionality                      │
+│                                                             │
+│  IF YOUR CHANGE BREAKS EXISTING TESTS → YOUR CHANGE IS WRONG│
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Pre-Implementation State Verification
+
+**BEFORE writing any code, you MUST:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  MANDATORY PRE-IMPLEMENTATION CHECKS                        │
+│                                                             │
+│  1. Run FULL test suite → All tests MUST pass               │
+│  2. Run type checking → No type errors                      │
+│  3. Run linting → No lint errors                            │
+│  4. Run build → Build succeeds                              │
+│  5. Document current state (snapshot)                       │
+│                                                             │
+│  ⚠️  DO NOT PROCEED if any check fails                      │
+│  ⚠️  Fix existing issues FIRST before new implementation    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Impact Analysis - MANDATORY Before Every Change
+
+| Check | Action | Failure Response |
+|-------|--------|------------------|
+| **Existing Tests** | Run full test suite | Fix broken tests FIRST |
+| **Type Safety** | Run typecheck | Resolve type errors FIRST |
+| **Dependencies** | Identify affected modules | Map all impact points |
+| **API Contracts** | Check for breaking changes | Maintain backward compatibility |
+| **Database Schema** | Review migrations | Ensure non-destructive changes |
+
+#### Zero-Impact Principles
+
+| Principle | Description |
+|-----------|-------------|
+| **Additive by Default** | Add new functionality, don't modify existing |
+| **Feature Flags** | Use flags for risky changes, enable gradually |
+| **Backward Compatibility** | Old code must continue working |
+| **Deprecate, Don't Delete** | Mark as deprecated before removal |
+| **Isolated Changes** | Changes should be self-contained |
+
+#### Post-Implementation Verification
+
+**AFTER every implementation, you MUST:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  MANDATORY POST-IMPLEMENTATION CHECKS                       │
+│                                                             │
+│  1. Run FULL test suite → All tests MUST still pass         │
+│  2. Run type checking → No new type errors                  │
+│  3. Run linting → No new lint errors                        │
+│  4. Run build → Build still succeeds                        │
+│  5. Compare with pre-implementation snapshot                │
+│  6. Verify no unintended side effects                       │
+│                                                             │
+│  ⚠️  If ANY existing test fails → REVERT your changes       │
+│  ⚠️  Your new feature is NOT worth breaking existing code   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Handling Breaking Changes
+
+If a breaking change is ABSOLUTELY necessary:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  BREAKING CHANGE PROTOCOL (Requires Explicit Approval)      │
+│                                                             │
+│  1. Document WHY the breaking change is necessary           │
+│  2. Get explicit approval from project owner                │
+│  3. Create migration path for affected code                 │
+│  4. Update ALL affected tests                               │
+│  5. Update ALL documentation                                │
+│  6. Communicate change to all stakeholders                  │
+│  7. Version bump (major version for breaking changes)       │
+│                                                             │
+│  ⚠️  NEVER make breaking changes without approval           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Impact Violations - STRICTLY PROHIBITED
+
+| Violation | Consequence |
+|-----------|-------------|
+| Breaking existing tests | **REVERT immediately** |
+| Modifying existing behavior without approval | **REVERT and get approval** |
+| Skipping pre-implementation checks | **STOP, run checks first** |
+| Ignoring failed existing tests | **NOT ALLOWED - fix them** |
+| "The old code was wrong anyway" | **NOT your decision - get approval** |
+| "I improved it while I was there" | **PROHIBITED - scope creep** |
+
+**WARNING: Any implementation that breaks existing functionality will be REJECTED. The codebase stability is paramount.**
+
+---
+
 ### 15.1 Pre-Implementation: Codebase Exploration (MANDATORY)
 
 **Before ANY implementation work begins, agents MUST explore and understand the codebase.**
@@ -1081,16 +1293,23 @@ Task details.
 | Step | Agent | Action |
 |------|-------|--------|
 | 0 | All Agents | **Explore and understand codebase** (MANDATORY) |
-| 1 | - | Create feature branch |
-| 2 | QA Agent | Create test suite |
-| 3 | Fullstack Agent | Implement feature (following explored patterns) |
-| 4 | - | Run quality gates |
-| 5 | - | Commit and create PR |
-| 6 | Principal Agent | Review #1: Initial review |
-| 7 | Fullstack Agent | Address feedback |
-| 8 | Principal Agent | Review #2: Verification |
-| 9 | Fullstack Agent | Address feedback |
-| 10 | Principal Agent | Review #3: Final approval |
+| 1 | All Agents | **Run pre-implementation checks** (tests, types, lint, build) |
+| 2 | - | Create feature branch |
+| 3 | QA Agent | **Write FAILING tests FIRST** (TDD RED phase - MANDATORY) |
+| 4 | QA Agent | **Verify tests FAIL** for the right reasons |
+| 5 | Fullstack Agent | **Write MINIMUM code** to pass tests (TDD GREEN phase) |
+| 6 | Fullstack Agent | **Refactor** while keeping tests green (TDD REFACTOR phase) |
+| 7 | All Agents | **Run ALL existing tests** - must ALL pass |
+| 8 | - | Run quality gates (typecheck, lint, test, build) |
+| 9 | - | **Verify no impact** to existing functionality |
+| 10 | - | Commit and create PR |
+| 11 | Principal Agent | Review #1: Initial review |
+| 12 | Fullstack Agent | Address feedback (following TDD for any changes) |
+| 13 | Principal Agent | Review #2: Verification |
+| 14 | Fullstack Agent | Address feedback (following TDD for any changes) |
+| 15 | Principal Agent | Review #3: Final approval |
+
+**CRITICAL:** Steps 3-4 (TDD) and Steps 7-9 (Impact Verification) are NON-NEGOTIABLE.
 
 ### 15.4 Minimum Review Requirements
 
@@ -1126,33 +1345,61 @@ Task details.
                     │
                     ▼
 ┌─────────────────────────────────────────────┐
-│  1. CREATE FEATURE BRANCH                   │
+│  1. PRE-IMPLEMENTATION STATE CHECK          │
+│     - Run ALL existing tests (must pass)    │
+│     - Run typecheck, lint, build            │
+│     - Document current state snapshot       │
+│     ⚠️  DO NOT PROCEED IF ANY CHECK FAILS   │
 └─────────────────────────────────────────────┘
                     │
                     ▼
 ┌─────────────────────────────────────────────┐
-│  2. QA AGENT: CREATE TEST SUITE             │
+│  2. CREATE FEATURE BRANCH                   │
 └─────────────────────────────────────────────┘
                     │
                     ▼
 ┌─────────────────────────────────────────────┐
-│  3. FULLSTACK AGENT: IMPLEMENT FEATURE      │
-│     (following explored patterns)           │
+│  3. TDD RED PHASE (MANDATORY)               │
+│     - QA Agent: Write FAILING tests FIRST   │
+│     - Verify tests fail for RIGHT reason    │
+│     ⚠️  NO IMPLEMENTATION CODE YET          │
 └─────────────────────────────────────────────┘
                     │
                     ▼
 ┌─────────────────────────────────────────────┐
-│  4. RUN QUALITY GATES                       │
+│  4. TDD GREEN PHASE (MANDATORY)             │
+│     - Fullstack: Write MINIMUM code to pass │
+│     - Only enough to make tests pass        │
+│     - No extra features or improvements     │
 └─────────────────────────────────────────────┘
                     │
                     ▼
 ┌─────────────────────────────────────────────┐
-│  5. COMMIT AND CREATE PR                    │
+│  5. TDD REFACTOR PHASE                      │
+│     - Clean up code quality                 │
+│     - Tests must stay GREEN                 │
+│     - No new functionality                  │
 └─────────────────────────────────────────────┘
                     │
                     ▼
 ┌─────────────────────────────────────────────┐
-│  6-10. REVIEW CYCLES (3 minimum)            │
+│  6. POST-IMPLEMENTATION VERIFICATION        │
+│     - Run ALL existing tests (must pass)    │
+│     - Run typecheck, lint, build            │
+│     - Compare with pre-implementation state │
+│     ⚠️  REVERT IF ANY EXISTING TEST FAILS   │
+└─────────────────────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────────┐
+│  7. COMMIT AND CREATE PR                    │
+└─────────────────────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────────┐
+│  8-12. REVIEW CYCLES (3 minimum)            │
+│     - Any changes follow TDD cycle          │
+│     - Re-verify zero impact after changes   │
 └─────────────────────────────────────────────┘
 ```
 
